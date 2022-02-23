@@ -11,7 +11,7 @@ using NAudio.Wave.SampleProviders;
 using System.Threading;
 using System.Diagnostics;
 
-namespace VoiceController
+namespace Soundboard
 {
     internal class Debugger
     {
@@ -57,13 +57,10 @@ namespace VoiceController
             SaveToFile(logTxt, "VoiceController.log");
         }
     }
-}
 
-namespace VoiceController
-{
     public class Talk
     {
-        public Form1 Form1;
+        public TTS TTS;
         private Debugger Debugger = new Debugger();
         public WaveOutEvent outputDevice = null;
         public WaveOutEvent virtualDevice = null;
@@ -248,7 +245,7 @@ namespace VoiceController
             string current = Directory.GetCurrentDirectory();
             if (virtualDevice != null && virtualDevice.PlaybackState == PlaybackState.Playing || outputDevice != null && outputDevice.PlaybackState == PlaybackState.Playing)
             {
-                Form1.TTSBox.Text = text;
+                TTS.TTSBox.Text = text;
                 MessageBox.Show("Please wait for the text to stop speaking before trying to speak again\n\n(atleast until I add a overide for this)");
                 return;
             }
@@ -307,7 +304,8 @@ namespace VoiceController
     {
         private static Debugger Debugger = new Debugger();
         private static Talk Talk = new Talk();
-        public static Form1 Form1;
+        public static TTS TTS;
+        public static Main MainForm;
         /// <summary>
         ///  The main entry point for the application.
         /// </summary>
@@ -353,15 +351,20 @@ namespace VoiceController
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
 
-            Form1 = new Form1
+            TTS = new TTS
             {
                 Talk = Talk
             };
 
-            Talk.Form1 = Form1;
+            MainForm = new Main
+            {
+                TTS = TTS
+            };
+
+            Talk.TTS = TTS;
             Talk.Init(DeviceNumberOut, DeviceNumberVirtual);
 
-            Application.Run(Form1);
+            Application.Run(MainForm);
         }
 
         private static void Application_ApplicationExit(object sender, EventArgs e)

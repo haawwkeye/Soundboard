@@ -8,15 +8,34 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-namespace VoiceController
+namespace Soundboard
 {
-    public partial class Form1 : Form
+    public partial class TTS : Form
     {
         public Talk Talk;
 
-        public Form1()
+        public TTS()
         {
             InitializeComponent();
+            Disposed += TTS_Disposed;
+        }
+
+        private void TTS_Disposed(object sender, EventArgs e)
+        {
+            //Stop_Click(sender, e);
+
+            if (Program.MainForm != null)
+            {
+                Program.MainForm.Show();
+
+                Program.TTS = new TTS
+                {
+                    Talk = Talk
+                };
+
+                Program.MainForm.TTS = Program.TTS;
+                Talk.TTS = Program.TTS;
+            }
         }
 
         private void Stop_Click(object sender, EventArgs e)

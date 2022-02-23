@@ -1,7 +1,7 @@
 ﻿
-namespace VoiceController
+namespace Soundboard
 {
-    partial class Form1
+    partial class TTS
     {
         /// <summary>
         ///  Required designer variable.
@@ -72,7 +72,7 @@ namespace VoiceController
             this.Stop.UseVisualStyleBackColor = true;
             this.Stop.Click += new System.EventHandler(this.Stop_Click);
             // 
-            // Form1
+            // TTS
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
@@ -80,8 +80,8 @@ namespace VoiceController
             this.Controls.Add(this.Stop);
             this.Controls.Add(this.TTSBox);
             this.Controls.Add(this.Speak);
-            this.Name = "Form1";
-            this.Text = "Form1";
+            this.Name = "TTS";
+            this.Text = "TTS";
             this.ResumeLayout(false);
             this.PerformLayout();
 
