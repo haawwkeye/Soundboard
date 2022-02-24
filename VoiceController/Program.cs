@@ -70,10 +70,38 @@ namespace Soundboard
         private AudioFileReader virtualAudioFile = null;
         private SpeechSynthesizer synth_out;
 
+        public VoiceGender voiceGender = VoiceGender.NotSet;
+        public VoiceAge voiceAge = VoiceAge.NotSet;
+
         private bool outputStopped = false;
         private bool virtualStopped = false;
 
         public float volume = 1f;
+
+        public void SwitchVoiceGender(string selectedItem)
+        {
+            voiceGender = selectedItem switch
+            {
+                "NotSet" => VoiceGender.NotSet,
+                "Male" => VoiceGender.Male,
+                "Female" => VoiceGender.Female,
+                "Neutral" => VoiceGender.Neutral,
+                _ => VoiceGender.NotSet,
+            };
+        }
+
+        public void SwitchVoiceAge(string selectedItem)
+        {
+            voiceAge = selectedItem switch
+            {
+                "NotSet" => VoiceAge.NotSet,
+                "Child" => VoiceAge.Child,
+                "Teen" => VoiceAge.Teen,
+                "Adult" => VoiceAge.Adult,
+                "Senior" => VoiceAge.Senior,
+                _ => VoiceAge.NotSet,
+            };
+        }
 
         internal void Init(int deviceNumberOut = -2, int virtualNumberOut = -2)
         {
@@ -216,12 +244,13 @@ namespace Soundboard
                         synth_out.Dispose();
 
                     synth_out = new SpeechSynthesizer();
+                    synth_out.SelectVoiceByHints(voiceGender, voiceAge);
                     synth_out.SetOutputToDefaultAudioDevice();
 
                     PromptBuilder builder = new PromptBuilder();
                     builder.AppendText(text);
 
-                    synth_out.Volume = (int)volume;
+                    //synth_out.Volume = (int)(volume*100);
                     synth_out.SpeakAsync(builder);
                 }
 
@@ -263,7 +292,7 @@ namespace Soundboard
 
                 runtimes += 1;
                 // Set voice to using hints
-                synth.SelectVoiceByHints(VoiceGender.Male, VoiceAge.NotSet);
+                synth.SelectVoiceByHints(voiceGender, voiceAge);
                 // Configure the synthesizer to output to an audio stream.  
                 synth.SetOutputToWaveStream(streamAudio);
 
@@ -392,8 +421,8 @@ namespace Soundboard
     }
     class Program
     {
-        private static Debugger Debugger = new Debugger();
-        private static Talk Talk = new Talk();
+        internal static Debugger Debugger = new Debugger();
+        internal static Talk Talk = new Talk();
         public static Main MainForm;
         public static TTS TTS;
         /// <summary>

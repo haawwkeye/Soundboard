@@ -12,13 +12,34 @@ namespace Soundboard
 {
     public partial class TTS : Form
     {
-        private string lastVol = "1";
+        //private string lastVol = "1";
         public Talk Talk;
 
         public TTS()
         {
             InitializeComponent();
+
             Disposed += TTS_Disposed;
+
+            if (Talk == null)
+                Talk = Program.Talk;
+
+            if (Talk == null)
+                throw new Exception("TTS App not found");
+
+            VoiceGender.Items.Add("NotSet");
+            VoiceGender.Items.Add("Male");
+            VoiceGender.Items.Add("Female");
+            VoiceGender.Items.Add("Neutral");
+
+            VoiceAge.Items.Add("NotSet");
+            VoiceAge.Items.Add("Child");
+            VoiceAge.Items.Add("Teen");
+            VoiceAge.Items.Add("Adult");
+            VoiceAge.Items.Add("Senior");
+
+            VoiceGender.SelectedItem = Talk.voiceGender.ToString();
+            VoiceAge.SelectedItem = Talk.voiceAge.ToString();
         }
 
         private void TTS_Disposed(object sender, EventArgs e)
@@ -58,6 +79,22 @@ namespace Soundboard
         private void SaveTTS_Click(object sender, EventArgs e)
         {
             Talk.PromptSave(TTSBox.Text);
+        }
+
+        private void VoiceGender_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (Talk == null) return;
+            var voiceGender = VoiceGender.SelectedItem.ToString();
+            Program.Debugger.Log($"Swtiching voice from {Talk.voiceGender} to {voiceGender}");
+            Talk.SwitchVoiceGender(voiceGender);
+        }
+
+        private void VoiceAge_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (Talk == null) return;
+            var voiceAge = VoiceAge.SelectedItem.ToString();
+            Program.Debugger.Log($"Swtiching voice from {Talk.voiceAge} to {voiceAge}");
+            Talk.SwitchVoiceAge(voiceAge);
         }
 
         /*
