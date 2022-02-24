@@ -22,7 +22,7 @@ namespace Soundboard
             return value.ToString("F");
         }
 
-        internal void SaveToFile(string text, string fileName)
+        internal void SaveToFile(string text, string fileName = "Debug.log")
         {
             if (IsWritingLog)
             {
@@ -54,7 +54,7 @@ namespace Soundboard
             string logTxt = $"{timeStamp} [DEBUG] {log}";
 
             Console.WriteLine(logTxt);
-            SaveToFile(logTxt, "VoiceController.log");
+            SaveToFile(logTxt);
         }
     }
 
@@ -240,24 +240,18 @@ namespace Soundboard
             }
         }
 
-        public void Speak(string text)
+        public MemoryStream MakeAudio(string text)
         {
-            string current = Directory.GetCurrentDirectory();
-            if (virtualDevice != null && virtualDevice.PlaybackState == PlaybackState.Playing || outputDevice != null && outputDevice.PlaybackState == PlaybackState.Playing)
-            {
-                TTS.TTSBox.Text = text;
-                MessageBox.Show("Please wait for the text to stop speaking before trying to speak again\n\n(atleast until I add a overide for this)");
-                return;
-            }
+            MemoryStream streamAudio = new MemoryStream();
 
+            string current = Directory.GetCurrentDirectory();
             if (string.IsNullOrWhiteSpace(text))
-                return;
+                return streamAudio;
 
             Debugger.Log(text);
 
             // Initialize a new instance of the speech synthesizer.  
             using (SpeechSynthesizer synth = new SpeechSynthesizer())
-            using (MemoryStream streamAudio = new MemoryStream())
             {
                 if (runtimes == int.MaxValue)
                     runtimes = 0;
@@ -279,33 +273,124 @@ namespace Soundboard
 
                 try
                 {
-                    string FileName = $"{current}/AudioFiles/DO_NOT_TOUCH{runtimes}.wav";
-
                     if (streamAudio.CanSeek)
                         streamAudio.Seek(0, SeekOrigin.Begin);
                     else
                         streamAudio.Position = 0;
-
-                    byte[] buffer = streamAudio.GetBuffer();
-
-                    File.WriteAllBytes(FileName, buffer);
-
-                    PlaySound(FileName, text);
                 }
                 catch (Exception e)
                 {
                     MessageBox.Show(e.Message + e.StackTrace, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     Debugger.Log(e.Message + e.StackTrace);
                 }
+
+                return streamAudio;
             }
+        }
+
+        public void Speak(string text)
+        {
+            string current = Directory.GetCurrentDirectory();
+            if (virtualDevice != null && virtualDevice.PlaybackState == PlaybackState.Playing || outputDevice != null && outputDevice.PlaybackState == PlaybackState.Playing)
+            {
+                TTS.TTSBox.Text = text;
+                MessageBox.Show("Please wait for the text to stop speaking before trying to speak again\n\n(atleast until I add a overide for this)");
+                return;
+            }
+
+            MemoryStream streamAudio = MakeAudio(text);
+
+            try
+            {
+                string FileName = $"{current}/AudioFiles/DO_NOT_TOUCH{runtimes}.wav";
+
+                if (streamAudio.CanSeek)
+                    streamAudio.Seek(0, SeekOrigin.Begin);
+                else
+                    streamAudio.Position = 0;
+
+                byte[] buffer = streamAudio.GetBuffer();
+
+                File.WriteAllBytes(FileName, buffer);
+
+                PlaySound(FileName, text);
+            }
+            catch (Exception e)
+            {
+                MessageBox.Show(e.Message + e.StackTrace, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                Debugger.Log(e.Message + e.StackTrace);
+            }
+        }
+
+        // Do I really need to explain this? it just replaces a string from a string with a string
+        private string ReplaceString(string sourceString, string removeString, string replace = "")
+        {
+            return sourceString.Replace(removeString, replace);
+        }
+
+        private DialogResult PromptFileDialog(string current, byte[] buffer)
+        {
+            SaveFileDialog saveFile = new SaveFileDialog
+            {
+                Filter = "Audio File|*.wav",
+                Title = "Save Voice",
+                InitialDirectory = $"{current}\\Sounds",
+                FileName = "AudioName",
+                DefaultExt = ".wav"
+            };
+
+            DialogResult dialogResult = saveFile.ShowDialog();
+
+            if (dialogResult == DialogResult.OK)
+            {
+                string fileName = ReplaceString(saveFile.FileName, Path.GetDirectoryName(saveFile.FileName)+"\\");
+                fileName = ReplaceString(fileName, ".wav");
+
+                if (string.IsNullOrWhiteSpace(fileName))
+                {
+                    Debugger.Log($"Failed to save file '{fileName}.wav'");
+                    DialogResult dialog = MessageBox.Show($"Cannot save file if name is null or whitespace", "Error", MessageBoxButtons.RetryCancel, MessageBoxIcon.Error);
+                    
+                    if (dialog == DialogResult.Retry)
+                    {
+                        return PromptFileDialog(current, buffer);
+                    }
+
+                    return DialogResult.Abort;
+                }
+                else
+                {
+                    Debugger.Log($"Saved file '{fileName}'");
+                    File.WriteAllBytes(saveFile.FileName, buffer);
+                }
+            }
+            else
+            {
+                string fileName = ReplaceString(saveFile.FileName, Path.GetDirectoryName(saveFile.FileName) + "\\");
+                fileName = ReplaceString(fileName, ".wav");
+
+                Debugger.Log($"Failed to save file '{fileName}.wav' :: {dialogResult}");
+            }
+
+            return dialogResult;
+        }
+
+        public void PromptSave(string text)
+        {
+            MemoryStream streamAudio = MakeAudio(text);
+
+            string current = Directory.GetCurrentDirectory();
+            byte[] buffer = streamAudio.GetBuffer();
+
+            PromptFileDialog(current, buffer);
         }
     }
     class Program
     {
         private static Debugger Debugger = new Debugger();
         private static Talk Talk = new Talk();
-        public static TTS TTS;
         public static Main MainForm;
+        public static TTS TTS;
         /// <summary>
         ///  The main entry point for the application.
         /// </summary>
@@ -315,6 +400,7 @@ namespace Soundboard
             Application.ApplicationExit += Application_ApplicationExit;
 
             Directory.CreateDirectory($"{Directory.GetCurrentDirectory()}/AudioFiles");
+            Directory.CreateDirectory($"{Directory.GetCurrentDirectory()}/Sounds");
             int DeviceNumberVirtual = -2;
             int DeviceNumberOut = -2;
 
@@ -322,30 +408,13 @@ namespace Soundboard
             {
                 WaveOutCapabilities capabilities = WaveOut.GetCapabilities(i);
 
-                //Debugger.Log(i + ": " + capabilities.ProductName);
-
                 if (capabilities.ProductName.ToLower().StartsWith("cable input"))
                 {
                     DeviceNumberVirtual = i;
                 }
-                /*
-                else
-                {
-                    DeviceNumberOut = i;
-                }
-                */
             }
 
             DeviceNumberOut = 0;
-
-            /*
-            if (DeviceNumberVirtual != -2)
-                Debugger.Log("Virtual Cable: " + WaveIn.GetCapabilities(DeviceNumberVirtual).ProductName);
-
-            if (DeviceNumberOut != -2)
-                Debugger.Log("Audio Device: " + WaveOut.GetCapabilities(DeviceNumberOut).ProductName);
-            */
-            
 
             Application.SetHighDpiMode(HighDpiMode.SystemAware);
             Application.EnableVisualStyles();
@@ -393,7 +462,6 @@ namespace Soundboard
             };
 
             Process.Start(kill);
-            //Process.GetCurrentProcess().Kill(true);
         }
     }
 }

@@ -21,7 +21,11 @@ namespace Soundboard
         {
             if (TTS != null)
             {
-                //TTS.StartPosition = StartPosition;
+                TTS.StartPosition = FormStartPosition.Manual;
+                TTS.Location = Program.MainForm.Location;
+                TTS.Size = Program.MainForm.Size;
+
+                Hide();
                 TTS.Show();
             }
         }

@@ -26,6 +26,10 @@ namespace Soundboard
 
             if (Program.MainForm != null)
             {
+                Program.MainForm.StartPosition = FormStartPosition.Manual;
+                Program.MainForm.Location = Location;
+                Program.MainForm.Size = Size;
+
                 Program.MainForm.Show();
 
                 Program.TTS = new TTS
@@ -48,6 +52,11 @@ namespace Soundboard
             string sayThis = TTSBox.Text;
             TTSBox.Text = "";
             Talk.Speak(sayThis);
+        }
+
+        private void SaveTTS_Click(object sender, EventArgs e)
+        {
+            Talk.PromptSave(TTSBox.Text);
         }
     }
 }
