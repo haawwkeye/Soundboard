@@ -12,6 +12,7 @@ namespace Soundboard
 {
     public partial class TTS : Form
     {
+        private string lastVol = "1";
         public Talk Talk;
 
         public TTS()
@@ -58,5 +59,38 @@ namespace Soundboard
         {
             Talk.PromptSave(TTSBox.Text);
         }
+
+        /*
+        private void Volume_TextChanged(object sender, EventArgs e)
+        {
+            string vol = Volume.Text;
+            float volume = Talk.volume;
+
+            if (float.TryParse(vol, out volume))
+            {
+                if (volume > 2)
+                {
+                    volume = 2;
+                    Volume.Text = volume.ToString();
+                }
+                else if (volume < 0)
+                {
+                    volume = 0;
+                    Volume.Text = volume.ToString();
+                }
+
+                lastVol = volume.ToString();
+                Talk.volume = volume;
+            }
+            else if (vol == "" || vol == "-")
+            {
+                return;
+            }
+            else
+            {
+                Volume.Text = lastVol;
+            }
+        }
+        */
     }
 }

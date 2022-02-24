@@ -33,6 +33,8 @@ namespace Soundboard
             this.TTSBox = new System.Windows.Forms.TextBox();
             this.Stop = new System.Windows.Forms.Button();
             this.SaveTTS = new System.Windows.Forms.Button();
+            this.Title = new System.Windows.Forms.Label();
+            this.TTSControlPanel = new System.Windows.Forms.Panel();
             this.SuspendLayout();
             // 
             // Speak
@@ -53,11 +55,11 @@ namespace Soundboard
             this.TTSBox.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.TTSBox.Location = new System.Drawing.Point(12, 12);
+            this.TTSBox.Location = new System.Drawing.Point(12, 54);
             this.TTSBox.MaxLength = 2147483647;
             this.TTSBox.Multiline = true;
             this.TTSBox.Name = "TTSBox";
-            this.TTSBox.Size = new System.Drawing.Size(776, 397);
+            this.TTSBox.Size = new System.Drawing.Size(577, 355);
             this.TTSBox.TabIndex = 1;
             // 
             // Stop
@@ -86,11 +88,32 @@ namespace Soundboard
             this.SaveTTS.UseVisualStyleBackColor = true;
             this.SaveTTS.Click += new System.EventHandler(this.SaveTTS_Click);
             // 
+            // Title
+            // 
+            this.Title.Font = new System.Drawing.Font("Segoe UI", 15.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            this.Title.Location = new System.Drawing.Point(12, 9);
+            this.Title.Name = "Title";
+            this.Title.Size = new System.Drawing.Size(776, 42);
+            this.Title.TabIndex = 4;
+            this.Title.Text = "TTS Panel";
+            this.Title.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            // 
+            // TTSControlPanel
+            // 
+            this.TTSControlPanel.BackColor = System.Drawing.SystemColors.Window;
+            this.TTSControlPanel.Cursor = System.Windows.Forms.Cursors.Default;
+            this.TTSControlPanel.Location = new System.Drawing.Point(595, 54);
+            this.TTSControlPanel.Name = "TTSControlPanel";
+            this.TTSControlPanel.Size = new System.Drawing.Size(194, 355);
+            this.TTSControlPanel.TabIndex = 5;
+            // 
             // TTS
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(800, 450);
+            this.Controls.Add(this.TTSControlPanel);
+            this.Controls.Add(this.Title);
             this.Controls.Add(this.SaveTTS);
             this.Controls.Add(this.Stop);
             this.Controls.Add(this.TTSBox);
@@ -108,6 +131,8 @@ namespace Soundboard
         public System.Windows.Forms.TextBox TTSBox;
         private System.Windows.Forms.Button Stop;
         private System.Windows.Forms.Button SaveTTS;
+        private System.Windows.Forms.Label Title;
+        private System.Windows.Forms.Panel TTSControlPanel;
     }
 }
 

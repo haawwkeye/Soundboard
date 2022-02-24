@@ -10,6 +10,7 @@ using NAudio.Wave;
 using NAudio.Wave.SampleProviders;
 using System.Threading;
 using System.Diagnostics;
+using System.Json;
 
 namespace Soundboard
 {
@@ -71,6 +72,8 @@ namespace Soundboard
 
         private bool outputStopped = false;
         private bool virtualStopped = false;
+
+        public float volume = 1f;
 
         internal void Init(int deviceNumberOut = -2, int virtualNumberOut = -2)
         {
@@ -203,6 +206,7 @@ namespace Soundboard
                 {
                     virtualStopped = false;
                     virtualDevice.Init(virtualAudioFile);
+                    virtualDevice.Volume = volume;
                     virtualDevice.Play();
                 }
 
@@ -217,6 +221,7 @@ namespace Soundboard
                     PromptBuilder builder = new PromptBuilder();
                     builder.AppendText(text);
 
+                    synth_out.Volume = (int)volume;
                     synth_out.SpeakAsync(builder);
                 }
 
