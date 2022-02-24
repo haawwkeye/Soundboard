@@ -17,10 +17,11 @@ namespace Soundboard
             InitializeComponent();
         }
 
-        private void button1_Click(object sender, EventArgs e)
+        private void GotoTTS_Click(object sender, EventArgs e)
         {
             if (TTS != null)
             {
+                //TTS.StartPosition = StartPosition;
                 TTS.Show();
             }
         }
