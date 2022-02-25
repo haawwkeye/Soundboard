@@ -83,16 +83,16 @@ namespace Soundboard
 
         private void VoiceGender_SelectedIndexChanged(object sender, EventArgs e)
         {
-            if (Talk == null) return;
             var voiceGender = VoiceGender.SelectedItem.ToString();
+            if (Talk == null) return;
             Program.Debugger.Log($"Swtiching voice from {Talk.voiceGender} to {voiceGender}");
             Talk.SwitchVoiceGender(voiceGender);
         }
 
         private void VoiceAge_SelectedIndexChanged(object sender, EventArgs e)
         {
-            if (Talk == null) return;
             var voiceAge = VoiceAge.SelectedItem.ToString();
+            if (Talk == null) return;
             Program.Debugger.Log($"Swtiching voice from {Talk.voiceAge} to {voiceAge}");
             Talk.SwitchVoiceAge(voiceAge);
         }

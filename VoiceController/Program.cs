@@ -10,7 +10,6 @@ using NAudio.Wave;
 using NAudio.Wave.SampleProviders;
 using System.Threading;
 using System.Diagnostics;
-using System.Json;
 
 namespace Soundboard
 {
@@ -70,8 +69,8 @@ namespace Soundboard
         private AudioFileReader virtualAudioFile = null;
         private SpeechSynthesizer synth_out;
 
-        public VoiceGender voiceGender = VoiceGender.NotSet;
-        public VoiceAge voiceAge = VoiceAge.NotSet;
+        public static VoiceGender voiceGender = VoiceGender.NotSet;
+        public static VoiceAge voiceAge = VoiceAge.NotSet;
 
         private bool outputStopped = false;
         private bool virtualStopped = false;
@@ -274,13 +273,13 @@ namespace Soundboard
             }
         }
 
-        public MemoryStream MakeAudio(string text)
+        public MemoryStream? MakeAudio(string text)
         {
             MemoryStream streamAudio = new MemoryStream();
 
             string current = Directory.GetCurrentDirectory();
             if (string.IsNullOrWhiteSpace(text))
-                return streamAudio;
+                return null;
 
             Debugger.Log(text);
 
@@ -333,6 +332,11 @@ namespace Soundboard
             }
 
             MemoryStream streamAudio = MakeAudio(text);
+
+            if (streamAudio == null)
+            {
+                return;
+            }
 
             try
             {
@@ -413,6 +417,11 @@ namespace Soundboard
         {
             MemoryStream streamAudio = MakeAudio(text);
 
+            if (streamAudio == null)
+            {
+                return;
+            }
+
             string current = Directory.GetCurrentDirectory();
             byte[] buffer = streamAudio.GetBuffer();
 
@@ -431,10 +440,20 @@ namespace Soundboard
         [STAThread]
         static void Main()
         {
-            Application.ApplicationExit += Application_ApplicationExit;
+            SettingsHandler.Start();
+
+            bool hasUpdate = AutoUpdate.CheckForUpdate();
+            Application.ApplicationExit += ApplicationExit;
 
             Directory.CreateDirectory($"{Directory.GetCurrentDirectory()}/AudioFiles");
             Directory.CreateDirectory($"{Directory.GetCurrentDirectory()}/Sounds");
+
+            if (hasUpdate && AutoUpdate.shouldUpdate)
+            {
+                AutoUpdate.Update();
+                return;
+            }
+
             int DeviceNumberVirtual = -2;
             int DeviceNumberOut = -2;
 
@@ -470,8 +489,13 @@ namespace Soundboard
             Application.Run(MainForm);
         }
 
-        private static void Application_ApplicationExit(object sender, EventArgs e)
+        private static void ApplicationExit(object sender, EventArgs e)
         {
+            SettingsHandler.settings["TTS"]["VoiceGender"] = Talk.voiceGender.ToString();
+            SettingsHandler.settings["TTS"]["VoiceAge"] = Talk.voiceAge.ToString();
+
+            SettingsHandler.Save();
+
             if (Talk.virtualDevice != null)
             {
                 Talk.virtualDevice.Stop();
